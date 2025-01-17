@@ -4,9 +4,9 @@ import PropertyCard from '../components/PropertyCard';
 const HomePage = () => {
   // Placeholder data
   const properties = [
-    { id: 1, title: "Modern Apartment", location: "New York", price: 2000, image: "https://via.placeholder.com/150" },
-    { id: 2, title: "Cozy House", location: "Los Angeles", price: 1800, image: "https://via.placeholder.com/150" },
-    { id: 3, title: "Spacious Villa", location: "Miami", price: 3500, image: "https://via.placeholder.com/150" },
+    { id: 1, title: "Modern Apartment", location: "New Delhi", price: 2000, image: "https://via.placeholder.com/150" },
+    { id: 2, title: "Cozy House", location: "Pune", price: 1800, image: "https://via.placeholder.com/150" },
+    { id: 3, title: "Spacious Villa", location: "Lucknow", price: 3500, image: "https://via.placeholder.com/150" },
     // Add more properties here
   ];
 
