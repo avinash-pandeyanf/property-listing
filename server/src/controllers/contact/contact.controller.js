@@ -11,7 +11,13 @@ const createContactRequest = asyncHandler(async (req, res) => {
     }
 
     const contact = await Contact.create({ topic, name, email, message });
-    return ApiResponse(201, contact, "Your contact has been created.");
+    if (!contact) {
+        throw new ApiError(500, "Failed to create contact.");
+    }
+
+    return res
+        .status(201)
+        .send(new ApiResponse(201, contact, "Your contact has been created."));
 });
 
 module.exports = { createContactRequest };
