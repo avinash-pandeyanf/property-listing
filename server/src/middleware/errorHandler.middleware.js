@@ -6,8 +6,8 @@ const errorHandler = (error, req, res, next) => {
         error: error.name,
         message: error.message,
         ...error,
-        // errors: error?.errors,
-        // stack: error.stack,
+        errors: error?.errors,
+        stack: error.stack,
     });
 };
 

@@ -1,65 +1,69 @@
 const { model, Schema } = require("mongoose");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
 
-const UserSchema = new Schema({
+const userSchema = new Schema({
     firstName: {
-        type: Schema.Types.String,
+        type: String,
         required: true,
     },
     lastName: {
-        type: Schema.Types.String,
+        type: String,
         required: true,
     },
     email: {
-        type: Schema.Types.String,
+        type: String,
         unique: true,
+        lowercase: true,
         required: true,
     },
     password: {
-        type: Schema.Types.String,
+        type: String,
         required: true,
     },
     phoneNumber: {
-        type: Schema.Types.String,
+        type: String,
         required: true,
     },
     selectRole: {
-        type: Schema.Types.String,
+        type: String,
+        enum: ["tenant", "landlord", "admin"], // TODO: Verify auth role
         required: true,
     },
     yourFirstSchool: {
-        type: Schema.Types.String,
+        type: String,
         required: true,
+    },
+    avatar: {
+        type: String,
     },
 });
 
-UserSchema.pre("save", async function (next) {
+userSchema.pre("save", async function (next) {
     if (!this.isModified("password")) return next();
 
     this.password = await bcrypt.hash(this.password, 10);
     next();
 });
 
-UserSchema.methods.hashPassword = async function (password) {
+userSchema.methods.hashPassword = async function (password) {
     return await bcrypt.hash(password, 10);
 };
 
-UserSchema.methods.isPasswordCorrect = async function (password) {
+userSchema.methods.isPasswordCorrect = async function (password) {
     return await bcrypt.compare(password, this.password);
 };
 
-userSchema.methods.generateAccessToken = function () {
+userSchema.methods.generateAuthToken = function () {
     return jwt.sign(
         {
             _id: this._id,
             email: this.email,
-            fullName: this.fullName,
         },
         process.env.TOKEN_SECRET
     );
 };
 
-const User = model("user", UserSchema);
+const User = model("user", userSchema);
 
 module.exports = User;

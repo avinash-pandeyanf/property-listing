@@ -25,30 +25,38 @@ const handleSignup = asyncHandler(async (req, res) => {
             yourFirstSchool,
         ].some((item) => !item)
     ) {
-        return ApiError(400, "Please provide all required fields");
+        throw new ApiError(400, "Please provide all required fields");
     }
 
-    const user = await User.create(
+    const user = await User.create({
         firstName,
         lastName,
         email,
         password,
         phoneNumber,
         selectRole,
-        yourFirstSchool
-    );
+        yourFirstSchool,
+    });
 
-    // TODO: Token response
-    return ApiResponse(
-        201,
-        {
-            firstName,
-            lastName,
-            email,
-            phoneNumber,
-            selectRole,
-        },
-        "User Created Successfully!"
+    if (!user) {
+        throw new ApiError(400, "Failed to create user");
+    }
+
+    const authToken = await user.generateAuthToken();
+
+    return res.status(201).send(
+        new ApiResponse(
+            201,
+            {
+                firstName,
+                lastName,
+                email,
+                phoneNumber,
+                selectRole,
+                authToken,
+            },
+            "User Created Successfully!"
+        )
     );
 });
 
