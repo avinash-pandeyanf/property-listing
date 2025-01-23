@@ -2,42 +2,45 @@ const { model, Schema } = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const userSchema = new Schema({
-    firstName: {
-        type: String,
-        required: true,
+const userSchema = new Schema(
+    {
+        firstName: {
+            type: String,
+            required: true,
+        },
+        lastName: {
+            type: String,
+            required: true,
+        },
+        email: {
+            type: String,
+            unique: true,
+            lowercase: true,
+            required: true,
+        },
+        password: {
+            type: String,
+            required: true,
+        },
+        phoneNumber: {
+            type: String,
+            required: true,
+        },
+        selectRole: {
+            type: String,
+            enum: ["tenant", "landlord", "admin"], // TODO: Verify auth role
+            required: true,
+        },
+        yourFirstSchool: {
+            type: String,
+            required: true,
+        },
+        avatar: {
+            type: String,
+        },
     },
-    lastName: {
-        type: String,
-        required: true,
-    },
-    email: {
-        type: String,
-        unique: true,
-        lowercase: true,
-        required: true,
-    },
-    password: {
-        type: String,
-        required: true,
-    },
-    phoneNumber: {
-        type: String,
-        required: true,
-    },
-    selectRole: {
-        type: String,
-        enum: ["tenant", "landlord", "admin"], // TODO: Verify auth role
-        required: true,
-    },
-    yourFirstSchool: {
-        type: String,
-        required: true,
-    },
-    avatar: {
-        type: String,
-    },
-});
+    { timestamps: true }
+);
 
 userSchema.pre("save", async function (next) {
     if (!this.isModified("password")) return next();

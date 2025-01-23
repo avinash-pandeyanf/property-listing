@@ -11,18 +11,10 @@ const verifyJWT = asyncHandler(async (req, _, next) => {
         throw new ApiError(401, "Unauthorized request");
     }
 
-    // TODO: Authenticate using auth token
     const decodedToken = await decodeAuthToken(token);
-    const user = await User(decodedToken?._id);
-    if (!user) {
-        throw new ApiError(401, "Invalid Access Token");
-    }
-
     req.user = {
-        _id: user._id,
-        username: user.username,
-        fullName: user.fullName,
-        email: user.email,
+        _id: decodedToken._id,
+        email: decodedToken.email,
     };
     return next();
 });
