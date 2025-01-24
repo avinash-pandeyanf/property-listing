@@ -62,9 +62,53 @@ const getAllBlogs = asyncHandler(async (req, res) => {
         .send(new ApiResponse(200, blogs, "All blogs accessed successfully."));
 });
 
+const updateBlogById = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { title, content, tags, image } = req.body;
+
+    if (!req.body) {
+        throw new ApiError(400, "Please provide changes to update!");
+    }
+
+    const blog = await Blog.findOneAndUpdate(
+        { _id: id, author: req.user._id },
+        { title, content, tags, image }
+        // { new: true }
+    );
+    if (!blog) {
+        throw new ApiError(404, "Blog not found.");
+    }
+
+    return res
+        .status(200)
+        .send(new ApiResponse(200, blog, "Blog updated successfully."));
+});
+
+const deleteBlogById = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    if (!id) {
+        throw new ApiError(400, "Invalid blog request.");
+    }
+
+    const blog = await Blog.deleteOne({
+        _id: id,
+        author: req.user._id,
+    }).exec();
+
+    if (!blog) {
+        throw new ApiError(404, "Blog not found.");
+    }
+
+    return res
+        .status(200)
+        .send(new ApiResponse(200, blog, "Blog deleted successfully."));
+});
+
 module.exports = {
     createNewBlog,
     getAllBlogsCreatedByAdmin,
     getOneBlogById,
     getAllBlogs,
+    updateBlogById,
+    deleteBlogById,
 };
