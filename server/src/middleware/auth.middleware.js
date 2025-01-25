@@ -1,6 +1,5 @@
 const { ApiError } = require("../utils/ApiError.js");
 const { asyncHandler } = require("../utils/asyncHandler.js");
-const User = require("../models/user.model.js");
 const { decodeAuthToken } = require("../utils/token.js");
 
 const verifyJWT = asyncHandler(async (req, _, next) => {
