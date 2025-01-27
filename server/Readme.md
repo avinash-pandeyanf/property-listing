@@ -55,6 +55,4 @@ _If anything is need to be known, go on add a new section for that knowledge!_
 [Avinash Pandey](https://github.com/avinash-pandeyanf)
 <br/>
 
-[Rohit](https://github.com/)
-
 _Happy Hacking!_
