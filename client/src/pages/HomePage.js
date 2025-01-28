@@ -7,6 +7,7 @@ const HomePage = () => {
   const [sortOption, setSortOption] = useState("date");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -15,13 +16,20 @@ const HomePage = () => {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/properties?page=${page}&sort=${sortOption}`
+          `http://localhost:5000/api/properties?page=${page}&sort=${sortOption}&limit=6`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch properties");
         }
         const data = await response.json();
-        setProperties((prev) => [...prev, ...data.properties]);
+        
+        if (page === 1) {
+          setProperties(data.properties);
+        } else {
+          setProperties(prev => [...prev, ...data.properties]);
+        }
+        
+        setHasMore(data.properties.length === 6);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -33,49 +41,80 @@ const HomePage = () => {
   }, [page, sortOption]);
 
   const handleLoadMore = () => {
-    setPage((prev) => prev + 1);
+    if (!loading && hasMore) {
+      setPage(prev => prev + 1);
+    }
   };
 
   const handleSortChange = (e) => {
     setSortOption(e.target.value);
     setProperties([]); // Reset properties when sorting changes
     setPage(1); // Reset to first page
+    setHasMore(true);
   };
 
   return (
-    <div className="bg-black text-white min-h-screen">
-      <header className="p-4 bg-gray-900 text-center text-2xl font-bold">Your Properties</header>
-      <main className="p-4">
-        <div className="mb-4">
-          <label htmlFor="sort" className="mr-2">Sort By:</label>
-          <select
-            id="sort"
-            value={sortOption}
-            onChange={handleSortChange}
-            className="p-2 bg-gray-700 text-white rounded"
-          >
-            <option value="date">Date Uploaded</option>
-            <option value="priceLow">Price: Low to High</option>
-            <option value="priceHigh">Price: High to Low</option>
-            <option value="popularity">Popularity</option>
-          </select>
+    <div className="min-h-screen bg-gray-900 text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold">Available Properties</h1>
+          <div className="flex items-center space-x-4">
+            <label htmlFor="sort" className="text-gray-300">Sort By:</label>
+            <select
+              id="sort"
+              value={sortOption}
+              onChange={handleSortChange}
+              className="bg-gray-800 border border-gray-700 text-white rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="date">Latest First</option>
+              <option value="cost_low">Price: Low to High</option>
+              <option value="cost_high">Price: High to Low</option>
+              <option value="popularity">Most Viewed</option>
+            </select>
+          </div>
         </div>
-        {error && <p className="text-red-500">{error}</p>}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+        {error && (
+          <div className="bg-red-500 text-white p-4 rounded-md mb-6">
+            {error}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {properties.map((property) => (
-            <PropertyCard key={property.id} property={property} />
+            <PropertyCard key={property._id} property={property} />
           ))}
         </div>
-        {loading && <p>Loading...</p>}
-        {!loading && (
-          <button
-            onClick={handleLoadMore}
-            className="mt-4 p-2 bg-yellow-500 text-black font-bold rounded"
-          >
-            Load More
-          </button>
+
+        {loading && (
+          <div className="flex justify-center mt-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
         )}
-      </main>
+
+        {!loading && hasMore && (
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={handleLoadMore}
+              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Load More
+            </button>
+          </div>
+        )}
+
+        {!hasMore && properties.length > 0 && (
+          <p className="text-center text-gray-400 mt-8">
+            No more properties to load
+          </p>
+        )}
+
+        {!loading && properties.length === 0 && (
+          <p className="text-center text-gray-400 mt-8">
+            No properties found
+          </p>
+        )}
+      </div>
     </div>
   );
 };
