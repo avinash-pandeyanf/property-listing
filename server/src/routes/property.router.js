@@ -1,14 +1,20 @@
 const router = require("express").Router();
-const propertyController = require("../controllers/property/property.controller.js");
+const {
+    getProperties,
+    getProperty,
+    createProperty,
+    updateProperty,
+    deleteProperty,
+} = require("../controllers/property/property.controller.js");
 const { verifyJWT } = require("../middleware/auth.middleware.js");
 
 // Public routes
-router.get("/", propertyController.getProperties);
-router.get("/:id", propertyController.getProperty);
+router.get("/", getProperties);
+router.get("/:id", getProperty);
 
 // Protected routes
-router.post("/", verifyJWT, propertyController.createProperty);
-router.put("/:id", verifyJWT, propertyController.updateProperty);
-router.delete("/:id", verifyJWT, propertyController.deleteProperty);
+router.post("/", verifyJWT, createProperty);
+router.put("/:id", verifyJWT, updateProperty);
+router.delete("/:id", verifyJWT, deleteProperty);
 
 module.exports = router;
