@@ -2,9 +2,7 @@ const { asyncHandler } = require("../../utils/asyncHandler.js");
 const User = require("../../models/user.model.js");
 const { ApiError } = require("../../utils/ApiError.js");
 const { ApiResponse } = require("../../utils/ApiResponse.js");
-// const bcrypt = require("bcrypt");
 const { Resend } = require("resend");
-// const moment = require("moment");
 const { randomUUID } = require("node:crypto");
 
 const handlePasswordChange = asyncHandler(async (req, res) => {
@@ -75,8 +73,6 @@ const handlePasswordResetRequest = asyncHandler(async (req, res) => {
         `;
 
     await resend.emails.send({
-        // TODO: Remove this before commit
-        // TODO: test mail if not working then use property learning@resend.dev
         from: "Property Listing <onboarding@resend.dev>",
         to: user.email,
         subject: "Reset Your Password",
@@ -101,34 +97,33 @@ const validatePasswordReset = asyncHandler(async (req, res) => {
 
     const isValidTimestamp =
         (Date.now() - timestamp) / 60000 <= 30 ? true : false;
-
     if (!isValidTimestamp) throw new ApiError(400, "Token Expired!");
 
     const user = await User.findOne({ resetToken: token });
     if (!user) throw new ApiError(400, "Invalid request");
-
-    await user.updateOne({ resetToken: null });
+    if (!user.resetToken) throw new ApiError(400, "Token Expired!");
 
     return res
         .status(200)
         .send(
             new ApiResponse(
                 200,
-                { _id: user._id, email: user.email },
+                { _id: user._id, email: user.email, token },
                 "Validation completed! Please reset the password."
             )
         );
 });
 
 const handleNewPasswordAfterValidation = asyncHandler(async (req, res) => {
-    const { _id, newPassword } = req.body;
+    const { _id, newPassword, token } = req.body;
     const user = await User.findOne({ _id });
-    if (!user) {
-        throw new ApiError(400, "User not found");
-    }
+    if (!user) throw new ApiError(400, "User not found");
+
+    if (!user.resetToken) throw new ApiError(400, "Token Expired!");
+    if (token !== user.resetToken) throw new ApiError(400, "Invalid token");
 
     const hashedPassword = await user.hashPassword(newPassword);
-    await user.updateOne({ password: hashedPassword });
+    await user.updateOne({ password: hashedPassword, resetToken: null });
     const authToken = await user.generateAuthToken();
 
     return res
