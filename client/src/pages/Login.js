@@ -1,29 +1,43 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Link, useNavigate } from 'react-router-dom';
+import '../styles/Auth.css';
 
 const Login = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
+    password: ''
   });
   const [error, setError] = useState('');
-  const navigate = useNavigate();
-  const { login } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [e.target.name]: e.target.value
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
+
     try {
-      await login(formData.email, formData.password);
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+
+      // Store the token
+      localStorage.setItem('token', data.data.authToken);
       navigate('/');
     } catch (err) {
       setError(err.message);
@@ -31,61 +45,49 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
-            Sign in to your account
-          </h2>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="auth-box">
+        <div className="auth-content">
+          <h2 className="text-3xl font-bold text-white mb-8 text-center">Login</h2>
           {error && (
-            <div className="bg-red-500 text-white p-3 rounded text-center">
+            <div className="bg-red-500 text-white p-3 rounded mb-4 text-center">
               {error}
             </div>
           )}
-          <div className="rounded-md shadow-sm -space-y-px">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
               <input
-                id="email"
-                name="email"
                 type="email"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
+                name="email"
                 value={formData.email}
                 onChange={handleChange}
+                placeholder="Email"
+                required
               />
             </div>
             <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
               <input
-                id="password"
-                name="password"
                 type="password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
+                name="password"
                 value={formData.password}
                 onChange={handleChange}
+                placeholder="Password"
+                required
               />
             </div>
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Sign in
+            <button type="submit" className="w-full">
+              LOGIN
             </button>
-          </div>
-        </form>
+            <div className="flex justify-between text-sm">
+              <Link to="/forgot-password">
+                Forgot Password ?
+              </Link>
+              <Link to="/register">
+                Register
+              </Link>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
