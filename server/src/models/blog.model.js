@@ -20,6 +20,9 @@ const BlogSchema = new Schema(
         image: {
             type: String,
         },
+        imagePublicId: {
+            type: String
+        }
     },
     { timestamps: true }
 );

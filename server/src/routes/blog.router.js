@@ -8,11 +8,17 @@ const {
     deleteBlogById,
 } = require("../controllers/blog/blog.controller.js");
 const { verifyJWT } = require("../middleware/auth.middleware.js");
+const { upload } = require("../middleware/multer.middleware.js");
 
 // Admin
-blogRouter.post("/new", verifyJWT, createNewBlog);
+blogRouter.post("/new", upload.single("image"), verifyJWT, createNewBlog);
 blogRouter.get("/admin/all", verifyJWT, getAllBlogsCreatedByAdmin);
-blogRouter.post("/update/:id", verifyJWT, updateBlogById);
+blogRouter.post(
+    "/update/:id",
+    upload.single("image"),
+    verifyJWT,
+    updateBlogById
+);
 blogRouter.post("/delete/:id", verifyJWT, deleteBlogById);
 
 // Public

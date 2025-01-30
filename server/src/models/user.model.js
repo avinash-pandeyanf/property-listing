@@ -28,7 +28,7 @@ const userSchema = new Schema(
         },
         selectRole: {
             type: String,
-            enum: ["tenant", "landlord", "admin"], // TODO: Verify auth role
+            enum: ["tenant", "landlord", "admin"],
             required: true,
         },
         yourFirstSchool: {
@@ -36,6 +36,9 @@ const userSchema = new Schema(
             required: true,
         },
         avatar: {
+            type: String,
+        },
+        avatarDisplayId: {
             type: String,
         },
         resetToken: {

@@ -2,6 +2,7 @@ const User = require("../../models/user.model.js");
 const { ApiResponse } = require("../../utils/ApiResponse.js");
 const { asyncHandler } = require("../../utils/asyncHandler.js");
 const { ApiError } = require("../../utils/ApiError.js");
+const { uploadOnCloudinary } = require("../../utils/cloudinary.js");
 
 const handleLogin = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
@@ -52,6 +53,7 @@ const handleSignup = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Please provide all required fields");
     }
 
+    const avatar = await uploadOnCloudinary(req.file?.path);
     const user = await User.create({
         firstName,
         lastName,
@@ -60,14 +62,15 @@ const handleSignup = asyncHandler(async (req, res) => {
         phoneNumber,
         selectRole,
         yourFirstSchool,
+        avatar: avatar?.url,
+        avatarDisplayId: avatar?.public_id,
     });
 
     if (!user) {
-        throw new ApiError(400, "Failed to create user");
+        throw new ApiError(500, "Failed to create user!");
     }
 
     const authToken = await user.generateAuthToken();
-
     return res.status(201).send(
         new ApiResponse(
             201,
@@ -78,6 +81,7 @@ const handleSignup = asyncHandler(async (req, res) => {
                 phoneNumber,
                 selectRole,
                 authToken,
+                avatar,
             },
             "User Created Successfully!"
         )

@@ -3,6 +3,7 @@ const cors = require("cors");
 const { connectDB } = require("./config/db.config.js");
 const errorHandler = require("./middleware/errorHandler.middleware.js");
 const api = require("./routes/api.js");
+const { initializeCloudinary } = require("./utils/cloudinary.js");
 require("dotenv").config();
 
 const app = express();
@@ -16,6 +17,7 @@ app.use(
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+initializeCloudinary();
 
 app.use("/api", api);
 // Error Handler

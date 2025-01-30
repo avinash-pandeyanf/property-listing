@@ -2,25 +2,31 @@ const { asyncHandler } = require("../../utils/asyncHandler.js");
 const { ApiError } = require("../../utils/ApiError.js");
 const { ApiResponse } = require("../../utils/ApiResponse.js");
 const Blog = require("../../models/blog.model.js");
+const {
+    uploadOnCloudinary,
+    removeCloudinaryImage,
+} = require("../../utils/cloudinary.js");
 
 const createNewBlog = asyncHandler(async (req, res) => {
-    const { title, content, tags, image } = req.body;
+    const { title, content, tags } = req.body;
     const user = req.user;
 
     if (!user) {
         throw new ApiError(401, "Unauthorized Request!");
     }
-
-    if ([title, content, tags].some((item) => !item)) {
+    if ([title, content].some((item) => !item)) {
         throw new ApiError(400, "Please provide all required fields!");
     }
+
+    const image = await uploadOnCloudinary(req.file?.path);
 
     const blog = await Blog.create({
         title,
         author: user._id,
         content,
         tags,
-        image,
+        image: image?.url,
+        imagePublicId: image.public_id,
     });
     if (!blog) {
         throw new ApiError(500, "Failed to create blog.");
@@ -64,20 +70,32 @@ const getAllBlogs = asyncHandler(async (req, res) => {
 
 const updateBlogById = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { title, content, tags, image } = req.body;
+    const { title, content, tags } = req.body;
 
     if (!req.body) {
         throw new ApiError(400, "Please provide changes to update!");
     }
 
-    const blog = await Blog.findOneAndUpdate(
-        { _id: id, author: req.user._id },
-        { title, content, tags, image }
-        // { new: true }
-    );
+    const blog = await Blog.findOne({ _id: id, author: req.user._id });
     if (!blog) {
         throw new ApiError(404, "Blog not found.");
     }
+
+    let image = null;
+    if (req.file) {
+        const removeResult = await removeCloudinaryImage(blog?.imagePublicId);
+        if (removeResult.result == "ok") {
+            image = await uploadOnCloudinary(req.file?.path);
+        }
+    }
+
+    await blog.updateOne({
+        title,
+        content,
+        tags,
+        image: image?.url,
+        imagePublicId: image?.public_id,
+    });
 
     return res
         .status(200)
@@ -90,15 +108,16 @@ const deleteBlogById = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid blog request.");
     }
 
-    const blog = await Blog.deleteOne({
+    const blog = await Blog.findOne({
         _id: id,
         author: req.user._id,
-    }).exec();
-
+    });
     if (!blog) {
         throw new ApiError(404, "Blog not found.");
     }
 
+    await removeCloudinaryImage(blog.imagePublicId);
+    await blog.deleteOne();
     return res
         .status(200)
         .send(new ApiResponse(200, blog, "Blog deleted successfully."));

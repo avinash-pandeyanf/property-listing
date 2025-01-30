@@ -36,10 +36,20 @@ const handleProfileUpdate = asyncHandler(async (req, res) => {
     const user = await User.findOne({ email: req.user?.email });
     if (!user) throw new ApiError(404, "User not found!");
 
+    let avatar = null;
+    if (req.file) {
+        const removeResult = await removeCloudinaryImage(blog?.imagePublicId);
+        if (removeResult.result == "ok") {
+            avatar = await uploadOnCloudinary(req.file?.path);
+        }
+    }
+
     const updatedUser = await user.updateOne({
         firstName,
         lastName,
         phoneNumber,
+        avatar: avatar?.url,
+        avatarDisplayId: avatar?.public_id,
     });
 
     if (!updatedUser)
@@ -47,7 +57,13 @@ const handleProfileUpdate = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .send(new ApiResponse(200, {}, "Profile updated successfully."));
+        .send(
+            new ApiResponse(
+                200,
+                { email: user?.email, _id: user._id },
+                "Profile updated successfully."
+            )
+        );
 });
 
 const handlePasswordResetRequest = asyncHandler(async (req, res) => {
