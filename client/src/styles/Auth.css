@@ -1,0 +1,117 @@
+.auth-box {
+  position: relative;
+  width: 400px;
+  height: auto;
+  background: black;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.auth-box::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    0deg,
+    transparent,
+    #45f3ff,
+    #45f3ff
+  );
+  transform-origin: bottom right;
+  animation: animate 6s linear infinite;
+}
+
+.auth-box::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    0deg,
+    transparent,
+    #ffeb3b,
+    #ffeb3b
+  );
+  transform-origin: bottom right;
+  animation: animate 6s linear infinite;
+  animation-delay: -3s;
+}
+
+.auth-content {
+  position: relative;
+  background: #28292d;
+  border-radius: 20px;
+  z-index: 1;
+  padding: 40px;
+}
+
+@keyframes animate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Form Styles */
+.auth-content input,
+.auth-content select {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid #45f3ff;
+  padding: 10px 0;
+  color: white;
+  font-size: 16px;
+  margin-bottom: 30px;
+  outline: none;
+  width: 100%;
+}
+
+.auth-content input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.auth-content select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2345f3ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 15px;
+}
+
+.auth-content select option {
+  background: #28292d;
+  color: white;
+  padding: 10px;
+}
+
+.auth-content button {
+  background: #45f3ff;
+  color: #28292d;
+  padding: 10px 0;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.auth-content button:hover {
+  background: #ffeb3b;
+}
+
+.auth-content a {
+  color: #45f3ff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.auth-content a:hover {
+  color: #ffeb3b;
+}
