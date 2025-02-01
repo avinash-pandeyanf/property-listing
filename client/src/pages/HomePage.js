@@ -1,125 +1,182 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaMapMarkerAlt, FaShareAlt, FaHeart, FaVideo, FaFilter } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaShareAlt, FaHeart, FaVideo, FaSearch } from 'react-icons/fa';
 
 const HomePage = () => {
   const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [selectedCity, setSelectedCity] = useState('all');
-  const [sort, setSort] = useState('date');
-  const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
+    city: 'all',
+    sort: 'date',
+    locality: '',
     bhk: [],
-    residential: [],
-    commercial: [],
-    type: ''
+    spaceType: [],
+    furnishingType: '',
+    minRent: '',
+    maxRent: '',
   });
-
-  const fetchProperties = useCallback(async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:5000/api/properties?page=${page}&city=${selectedCity}&sort=${sort}`
-      );
-      const data = await response.json();
-      setProperties(data.properties || []);
-      setTotalPages(data.totalPages || 1);
-    } catch (error) {
-      console.error('Error fetching properties:', error);
-    }
-  }, [page, selectedCity, sort]);
 
   useEffect(() => {
     fetchProperties();
-  }, [fetchProperties]);
+  }, [filters, page]);
 
-  const handlePageChange = (newPage) => {
-    setPage(newPage);
-  };
+  const fetchProperties = async () => {
+    try {
+      setError(null);
+      const queryParams = new URLSearchParams();
+      queryParams.append('page', page);
+      queryParams.append('sort', filters.sort);
+      
+      if (filters.city !== 'all') queryParams.append('city', filters.city);
+      if (filters.locality) queryParams.append('locality', filters.locality);
+      if (filters.bhk.length) queryParams.append('bhk', filters.bhk.join(','));
+      if (filters.spaceType.length) queryParams.append('spaceType', filters.spaceType.join(','));
+      if (filters.furnishingType) queryParams.append('type', filters.furnishingType);
+      if (filters.minRent) queryParams.append('minRent', filters.minRent);
+      if (filters.maxRent) queryParams.append('maxRent', filters.maxRent);
 
-  const handleFilterChange = (filterType, value) => {
-    setPage(1); // Reset to first page when changing filters
-    switch (filterType) {
-      case 'city':
-        setSelectedCity(value);
-        break;
-      case 'sort':
-        setSort(value);
-        break;
-      default:
-        break;
+      const response = await fetch(`/api/properties?${queryParams}`, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        try {
+          const jsonError = JSON.parse(errorData);
+          throw new Error(jsonError.message || 'Failed to fetch properties');
+        } catch (e) {
+          throw new Error(errorData || 'Failed to fetch properties');
+        }
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Received non-JSON response from server');
+      }
+
+      const data = await response.json();
+      if (!data || !data.data) {
+        throw new Error('Invalid response format');
+      }
+
+      setProperties(data.data.properties || []);
+      setTotalPages(data.data.totalPages || 1);
+    } catch (err) {
+      console.error('Error fetching properties:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleBHKChange = (bhk) => {
-    setFilters(prev => ({
-      ...prev,
-      bhk: prev.bhk.includes(bhk) 
-        ? prev.bhk.filter(b => b !== bhk)
-        : [...prev.bhk, bhk]
-    }));
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+    setPage(1);
   };
 
-  const handleResidentialChange = (type) => {
-    setFilters(prev => ({
-      ...prev,
-      residential: prev.residential.includes(type)
-        ? prev.residential.filter(t => t !== type)
-        : [...prev.residential, type]
-    }));
-  };
+  const renderPropertyCard = (property) => (
+    <div key={property._id} className="bg-white rounded-lg overflow-hidden shadow-lg">
+      <div className="relative">
+        <div className="absolute top-2 left-2 bg-teal-500 text-white px-2 py-1 rounded text-sm">
+          Available
+        </div>
+        <div className="relative group">
+          <img
+            src={property.photos[0]}
+            alt={property.title}
+            className="w-full h-48 object-cover"
+          />
+          <div className="absolute bottom-2 left-2 flex items-center text-white">
+            <FaMapMarkerAlt className="mr-1" />
+            <span>{property.locality}</span>
+            {property.videoUrl && (
+              <div className="ml-2 flex items-center">
+                <FaVideo className="mr-1" />
+                <span>{property.photos.length}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
-  const handleCommercialChange = (type) => {
-    setFilters(prev => ({
-      ...prev,
-      commercial: prev.commercial.includes(type)
-        ? prev.commercial.filter(t => t !== type)
-        : [...prev.commercial, type]
-    }));
-  };
-
-  const handleFurnishingChange = (type) => {
-    setFilters(prev => ({
-      ...prev,
-      type: type
-    }));
-  };
+      <div className="p-4">
+        <div className="flex justify-between items-start mb-2">
+          <div>
+            <h3 className="text-xl font-semibold text-gray-800">
+              {property.bhk} BHK {property.spaceType}
+            </h3>
+            <p className="text-gray-600">On Rent</p>
+          </div>
+          <div className="flex space-x-2">
+            <button className="text-gray-500 hover:text-gray-700">
+              <FaShareAlt />
+            </button>
+            <button className="text-gray-500 hover:text-red-500">
+              <FaHeart />
+            </button>
+          </div>
+        </div>
+        <div className="mt-2">
+          <p className="text-gray-800 font-semibold">
+            ₹ {property.rent.toLocaleString()}
+          </p>
+          <div className="text-sm text-gray-500 mt-1">
+            {property.views || 0} views
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-black">
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-yellow-500">Property Listing</h1>
-          <div className="flex gap-4">
-            <div className="relative">
-              <select
-                className="bg-gray-800 text-white px-4 py-2 rounded"
-                onChange={(e) => handleFilterChange('sort', e.target.value)}
-                value={sort}
-              >
-                <option value="date">Sort</option>
-                <option value="cost_low">Price Low to High</option>
-                <option value="cost_high">Price High to Low</option>
-                <option value="popularity">Most Popular</option>
-              </select>
-            </div>
-            <div className="relative">
-              <button
-                className="bg-gray-800 text-white px-4 py-2 rounded flex items-center"
-                onClick={() => setSelectedCity('all')}
-              >
-                Select City <span className="ml-2">▼</span>
-              </button>
-            </div>
-            <button
-              className="bg-gray-800 text-white px-4 py-2 rounded flex items-center"
-              onClick={() => setShowFilters(!showFilters)}
+        <h1 className="text-4xl font-bold text-yellow-500 mb-8">Property Listing</h1>
+        
+        <div className="flex items-center space-x-4 mb-8">
+          <div className="flex-1 flex space-x-2">
+            <select
+              value={filters.city}
+              onChange={(e) => handleFilterChange('city', e.target.value)}
+              className="bg-white text-gray-800 px-4 py-2 rounded-l-lg w-40"
             >
-              <FaFilter className="mr-2" /> Filters ({Object.values(filters).flat().length})
-            </button>
-            <div className="bg-gray-800 text-white px-4 py-2 rounded">
-              Visit <span className="bg-yellow-500 text-black px-2 rounded">0</span>
+              <option value="all">Select Your City</option>
+              <option value="Lucknow">Lucknow</option>
+              <option value="Delhi">Delhi</option>
+              <option value="Mumbai">Mumbai</option>
+            </select>
+            
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                value={filters.locality}
+                onChange={(e) => handleFilterChange('locality', e.target.value)}
+                placeholder="Search by locality or area..."
+                className="w-full px-4 py-2 pr-10 text-gray-800 rounded-r-lg focus:outline-none"
+              />
+              <FaSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             </div>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <select
+              value={filters.sort}
+              onChange={(e) => handleFilterChange('sort', e.target.value)}
+              className="bg-gray-800 text-white px-4 py-2 rounded"
+            >
+              <option value="date">Sort</option>
+              <option value="cost_low">Price Low to High</option>
+              <option value="cost_high">Price High to Low</option>
+              <option value="popularity">Most Popular</option>
+            </select>
+
             <Link
               to="/add-property"
               className="bg-teal-500 text-white px-4 py-2 rounded hover:bg-teal-600"
@@ -129,193 +186,55 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* Filters Modal */}
-        {showFilters && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-96">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">All Filters</h2>
-                <button onClick={() => setShowFilters(false)}>&times;</button>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-semibold mb-2">BHK</h3>
-                  <div className="flex gap-2">
-                    {[1, 2, 3, 4].map(bhk => (
-                      <button
-                        key={bhk}
-                        className={`px-3 py-1 rounded ${
-                          filters.bhk.includes(bhk)
-                            ? 'bg-teal-500 text-white'
-                            : 'bg-gray-200'
-                        }`}
-                        onClick={() => handleBHKChange(bhk)}
-                      >
-                        {bhk} BHK
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-2">Residential</h3>
-                  <div className="flex gap-2 flex-wrap">
-                    {['Flat', 'House', 'Villa'].map(type => (
-                      <button
-                        key={type}
-                        className={`px-3 py-1 rounded ${
-                          filters.residential.includes(type)
-                            ? 'bg-teal-500 text-white'
-                            : 'bg-gray-200'
-                        }`}
-                        onClick={() => handleResidentialChange(type)}
-                      >
-                        {type}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-2">Commercial</h3>
-                  <div className="flex gap-2 flex-wrap">
-                    {['Office', 'Shop', 'Warehouse'].map(type => (
-                      <button
-                        key={type}
-                        className={`px-3 py-1 rounded ${
-                          filters.commercial.includes(type)
-                            ? 'bg-teal-500 text-white'
-                            : 'bg-gray-200'
-                        }`}
-                        onClick={() => handleCommercialChange(type)}
-                      >
-                        {type}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-2">Furnishing Type</h3>
-                  <div className="flex gap-2">
-                    <select
-                      className="w-full p-2 border rounded"
-                      value={filters.type}
-                      onChange={(e) => handleFurnishingChange(e.target.value)}
-                    >
-                      <option value="">Select Type</option>
-                      <option value="Fully Furnished">Fully Furnished</option>
-                      <option value="Semi Furnished">Semi Furnished</option>
-                      <option value="Non Furnished">Non Furnished</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="flex gap-2 mt-4">
-                  <button
-                    className="w-full py-2 bg-gray-200 rounded"
-                    onClick={() => setFilters({
-                      bhk: [],
-                      residential: [],
-                      commercial: [],
-                      type: ''
-                    })}
-                  >
-                    Reset
-                  </button>
-                  <button
-                    className="w-full py-2 bg-teal-500 text-white rounded"
-                    onClick={() => setShowFilters(false)}
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
-            </div>
+        {error && (
+          <div className="bg-red-500 text-white p-4 rounded mb-6">
+            {error}
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {properties.map((property) => (
-            <div key={property._id} className="bg-gray-800 rounded-lg overflow-hidden">
-              <div className="relative">
-                <img
-                  src={property.photos[0]}
-                  alt={property.title}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="absolute top-4 right-4 flex gap-2">
-                  <button className="p-2 bg-white rounded-full hover:bg-gray-100">
-                    <FaHeart className="text-red-500" />
-                  </button>
-                  <button className="p-2 bg-white rounded-full hover:bg-gray-100">
-                    <FaShareAlt className="text-gray-700" />
-                  </button>
-                  {property.videoUrl && (
-                    <button className="p-2 bg-white rounded-full hover:bg-gray-100">
-                      <FaVideo className="text-gray-700" />
-                    </button>
-                  )}
-                </div>
-                <div className="absolute top-4 left-4">
-                  <span className="bg-teal-500 text-white px-2 py-1 rounded text-sm">
-                    Available
-                  </span>
-                </div>
-              </div>
-              <div className="p-4">
-                <div className="flex items-center text-yellow-500 mb-2">
-                  <FaMapMarkerAlt className="mr-2" />
-                  <span>{property.locality}</span>
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-2">
-                  {property.spaceType} for Rent
-                </h3>
-                <p className="text-gray-400 mb-4">{property.address}</p>
-                <div className="flex justify-between items-center">
-                  <span className="text-2xl font-bold text-yellow-500">
-                    ₹{property.rent}/month
-                  </span>
-                  <Link
-                    to={`/property/${property._id}`}
-                    className="px-4 py-2 bg-teal-500 text-white rounded hover:bg-teal-600"
-                  >
-                    View Details
-                  </Link>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
+          </div>
+        ) : properties.length === 0 ? (
+          <div className="text-center text-gray-400 py-12">
+            <p className="text-xl mb-2">No properties found</p>
+            <p>Try adjusting your search criteria</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {properties.map(renderPropertyCard)}
+          </div>
+        )}
 
-        {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex justify-center mt-8 gap-2">
+          <div className="flex justify-center items-center space-x-2 mt-8">
             <button
-              onClick={() => handlePageChange(1)}
-              className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700"
+              onClick={() => setPage(prev => Math.max(prev - 1, 1))}
               disabled={page === 1}
+              className="px-3 py-1 bg-gray-800 text-white rounded"
             >
               Previous
             </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+            
+            {[...Array(totalPages)].map((_, i) => (
               <button
-                key={pageNum}
-                onClick={() => handlePageChange(pageNum)}
-                className={`px-4 py-2 rounded ${
-                  pageNum === page
-                    ? 'bg-teal-500 text-white'
+                key={i}
+                onClick={() => setPage(i + 1)}
+                className={`px-3 py-1 rounded ${
+                  page === i + 1
+                    ? 'bg-yellow-500 text-black'
                     : 'bg-gray-800 text-white hover:bg-gray-700'
                 }`}
               >
-                {pageNum}
+                {i + 1}
               </button>
             ))}
+            
             <button
-              onClick={() => handlePageChange(totalPages)}
-              className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700"
+              onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
               disabled={page === totalPages}
+              className="px-3 py-1 bg-gray-800 text-white rounded"
             >
               Next
             </button>
