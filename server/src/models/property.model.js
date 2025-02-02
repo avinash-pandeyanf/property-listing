@@ -10,13 +10,16 @@ const PropertySchema = new Schema(
             type: String,
             required: true,
         },
+        owner: {
+            type: String,
+            required: true,
+        },
         ownersContactNumber: {
             type: String,
             required: true,
         },
         ownersAlternateNumber: {
             type: String,
-            required: true,
         },
         locality: {
             type: String,
@@ -82,7 +85,11 @@ const PropertySchema = new Schema(
             required: true,
         },
         photos: {
-            type: String,
+            type: [String],
+            required: true,
+        },
+        photosDisplayId: {
+            type: [String],
             required: true,
         },
         squareFeetArea: {
@@ -91,11 +98,9 @@ const PropertySchema = new Schema(
         },
         appliances: {
             type: String,
-            required: true,
         },
         amenities: {
             type: String,
-            required: true,
         },
         aboutTheProperty: {
             type: String,
@@ -103,7 +108,6 @@ const PropertySchema = new Schema(
         },
         comments: {
             type: String,
-            required: true,
         },
     },
     { timestamps: true }
