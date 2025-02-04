@@ -1,4 +1,3 @@
-// App.js (Updated)
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -9,8 +8,8 @@ import AddProperty from './pages/AddProperty';
 import PropertyDetails from './pages/PropertyDetails';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import PropertiesPage from './pages/PropertiesPage';
 import './App.css';
+
 
 
 const ProtectedRoute = ({ children }) => {
@@ -27,8 +26,7 @@ function App() {
           <main className="flex-grow">
             <Routes>
               <Route path="/" element={<HomePage />} />
-              <Route path="/properties" element={<PropertiesPage />} /> {/* Route for all properties */}
-              <Route path="/property/:id" element={<PropertyDetails />} /> {/* Route for single property details */}
+              <Route path="/property/:id" element={<PropertyDetails />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route
@@ -39,8 +37,8 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-               {/* Redirect any invalid route to the home page */}
-              <Route path="*" element={<Navigate to="/" />} /> 
+              {/* Catch-all route for handling 404 errors */}
+              <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </main>
           <Footer />

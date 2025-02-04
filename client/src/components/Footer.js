@@ -26,9 +26,6 @@ const Footer = () => {
         </div>
 
 
-        {/* Remove Services section completely as there are no backend routes */}
-        {/* Could be added back if those features are implemented */}
-
         <div>
           <h2 className="text-2xl font-bold text-teal-500 mb-4">To-Let Globe</h2>
           <p className="text-sm">One-stop solution for all your brokerage-free rental needs</p>
