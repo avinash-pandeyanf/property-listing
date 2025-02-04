@@ -19,20 +19,15 @@ const Footer = () => {
           <h3 className="text-xl font-bold mb-4 text-teal-500">QUICK LINKS</h3>
           <ul className="space-y-2">
             <li><Link to="/" className="hover:text-teal-500">Home</Link></li>
-            <li><Link to="/blog" className="hover:text-teal-500">Blog</Link></li>
-            <li><Link to="/properties" className="hover:text-teal-500">Property</Link></li>
+            {/* Remove Blog link if no backend route exists */}
+            {/* <li><Link to="/blog" className="hover:text-teal-500">Blog</Link></li> */}
+            <li><Link to="/properties" className="hover:text-teal-500">Property</Link></li> 
           </ul>
         </div>
 
-        <div>
-          <h3 className="text-xl font-bold mb-4 text-teal-500">SERVICES</h3>
-          <ul className="space-y-2">
-            <li><Link to="/services/paying-guest" className="hover:text-teal-500">Paying Guest</Link></li>
-            <li><Link to="/services/flat-and-house" className="hover:text-teal-500">Flat and House</Link></li>
-            <li><Link to="/services/office" className="hover:text-teal-500">Office</Link></li>
-            <li><Link to="/services/shops-and-godown" className="hover:text-teal-500">Shops and Godown</Link></li>
-          </ul>
-        </div>
+
+        {/* Remove Services section completely as there are no backend routes */}
+        {/* Could be added back if those features are implemented */}
 
         <div>
           <h2 className="text-2xl font-bold text-teal-500 mb-4">To-Let Globe</h2>
@@ -41,7 +36,7 @@ const Footer = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 mt-12 pt-8 border-t border-gray-800 text-center">
-        <p> 2023 To-Let Globe -- Lucknow</p>
+        <p> 2025 To-Let Globe -- Lucknow</p>
       </div>
     </footer>
   );
