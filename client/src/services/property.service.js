@@ -1,4 +1,4 @@
-const API_URL = '/api';
+const API_URL = process.env.REACT_APP_API_URL || 'https://your-render-url.com/api/v1';
 
 export const propertyService = {
     getProperties: async (queryParams) => {

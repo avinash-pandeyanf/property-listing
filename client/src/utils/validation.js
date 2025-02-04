@@ -27,8 +27,8 @@ export const validatePropertyForm = (values) => {
     errors.spaceType = 'Space type is required';
   }
   
-  if (!values.rent || values.rent <= 0) {
-    errors.rent = 'Valid rent amount is required';
+  if (!values.subscriptionAmount || values.subscriptionAmount <= 0) {
+    errors.subscriptionAmount = 'Valid subscription amount is required';
   }
   
   if (values.photos?.length < 5) {

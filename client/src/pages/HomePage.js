@@ -66,7 +66,7 @@ const HomePage = () => {
         throw new Error('Invalid response format');
       }
 
-      setProperties(data.data.properties || []);
+      setProperties(data.data || []);
       setTotalPages(data.data.totalPages || 1);
     } catch (err) {
       console.error('Error fetching properties:', err);
