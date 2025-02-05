@@ -1,13 +1,11 @@
-import { API_URL, handleResponse, authHeader } from '../utils/api';
+import { API_URL, handleResponse, fetchConfig } from '../utils/api';
 
 export const propertyService = {
     getProperties: async (queryParams) => {
-        const response = await fetch(`${API_URL}/properties?${queryParams}`, {
-            method: 'GET',
-            headers: authHeader(),
-            credentials: 'include',
-            mode: 'cors'
-        });
+        const response = await fetch(
+            `${API_URL}/api/properties?${queryParams}`, 
+            fetchConfig('GET')
+        );
         
         if (!response.ok) {
             const errorData = await response.json();
@@ -18,12 +16,10 @@ export const propertyService = {
     },
 
     getPropertyById: async (id) => {
-        const response = await fetch(`${API_URL}/properties/${id}`, {
-            method: 'GET',
-            headers: authHeader(),
-            credentials: 'include',
-            mode: 'cors'
-        });
+        const response = await fetch(
+            `${API_URL}/api/properties/${id}`, 
+            fetchConfig('GET')
+        );
         
         if (!response.ok) {
             const errorData = await response.json();
@@ -34,17 +30,10 @@ export const propertyService = {
     },
 
     createProperty: async (formData) => {
-        // Remove Content-Type header for FormData
-        const headers = authHeader();
-        delete headers['Content-Type'];
-        
-        const response = await fetch(`${API_URL}/properties`, {
-            method: 'POST',
-            headers: headers,
-            credentials: 'include',
-            mode: 'cors',
-            body: formData
-        });
+        const response = await fetch(
+            `${API_URL}/api/properties`, 
+            fetchConfig('POST', formData)
+        );
         
         if (!response.ok) {
             const errorData = await response.json();

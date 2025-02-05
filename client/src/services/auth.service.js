@@ -1,14 +1,11 @@
-import { API_URL, handleResponse, authHeader } from '../utils/api';
+import { API_URL, handleResponse, fetchConfig } from '../utils/api';
 
 export const authService = {
     login: async (email, password) => {
-        const response = await fetch(`${API_URL}/auth/login`, {
-            method: 'POST',
-            headers: authHeader(),
-            credentials: 'include',
-            mode: 'cors',
-            body: JSON.stringify({ email, password })
-        });
+        const response = await fetch(
+            `${API_URL}/api/auth/login`, 
+            fetchConfig('POST', { email, password })
+        );
         
         if (!response.ok) {
             const errorData = await response.json();
@@ -18,13 +15,10 @@ export const authService = {
     },
 
     register: async (userData) => {
-        const response = await fetch(`${API_URL}/auth/signup`, {
-            method: 'POST',
-            headers: authHeader(),
-            credentials: 'include',
-            mode: 'cors',
-            body: JSON.stringify(userData)
-        });
+        const response = await fetch(
+            `${API_URL}/api/auth/signup`, 
+            fetchConfig('POST', userData)
+        );
         
         if (!response.ok) {
             const errorData = await response.json();
@@ -33,4 +27,5 @@ export const authService = {
         return response.json();
     }
 };
+
 

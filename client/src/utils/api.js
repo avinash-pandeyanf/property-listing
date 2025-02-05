@@ -1,4 +1,4 @@
-export const API_URL = process.env.REACT_APP_API_URL || 'https://property-listing-0m2j.onrender.com/api';
+export const API_URL = process.env.REACT_APP_API_URL || 'https://property-listing-0m2j.onrender.com';
 
 export const handleResponse = async (response) => {
     if (!response.ok) {
@@ -12,8 +12,7 @@ export const authHeader = () => {
     const token = localStorage.getItem('token');
     const headers = {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Origin': window.location.origin
+        'Accept': 'application/json'
     };
 
     if (token) {
@@ -23,8 +22,22 @@ export const authHeader = () => {
     return headers;
 };
 
-export const fetchConfig = {
-    credentials: 'include',
-    mode: 'cors',
-    headers: authHeader()
+export const fetchConfig = (method = 'GET', body = null) => {
+    const config = {
+        method,
+        headers: authHeader(),
+        credentials: 'include',
+        mode: 'cors'
+    };
+
+    if (body) {
+        if (body instanceof FormData) {
+            delete config.headers['Content-Type'];
+            config.body = body;
+        } else {
+            config.body = JSON.stringify(body);
+        }
+    }
+
+    return config;
 };

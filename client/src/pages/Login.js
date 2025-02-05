@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { API_URL } from '../utils/api';
+import { API_URL, fetchConfig } from '../utils/api';
 import '../styles/Auth.css';
 
 
@@ -24,16 +24,10 @@ const Login = () => {
     setError('');
 
     try {
-        const response = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        credentials: 'include',
-        mode: 'cors',
-        body: JSON.stringify(formData)
-      });
+      const response = await fetch(
+        `${API_URL}/api/auth/login`,
+        fetchConfig('POST', formData)
+      );
 
       const data = await response.json();
 
@@ -41,9 +35,9 @@ const Login = () => {
         throw new Error(data.message || 'Login failed');
       }
 
-      // Store the token
       localStorage.setItem('token', data.data.authToken);
       navigate('/');
+
     } catch (err) {
       setError(err.message);
     }

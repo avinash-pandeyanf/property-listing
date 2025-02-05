@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { FaMapMarkerAlt, FaShareAlt, FaHeart, FaVideo, FaParking, FaPaw, FaFan, FaToilet, FaRulerCombined } from 'react-icons/fa';
-import { API_URL } from '../utils/api';
+import { API_URL, fetchConfig } from '../utils/api';
 
 
 const PropertyDetails = () => {
@@ -14,15 +14,11 @@ const PropertyDetails = () => {
   useEffect(() => {
     const fetchProperty = async () => {
       try {
-        const response = await fetch(`${API_URL}/properties/${id}`, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include',
-          mode: 'cors'
-        });
+        const response = await fetch(
+          `${API_URL}/api/properties/${id}`,
+          fetchConfig('GET')
+        );
+
         const data = await response.json();
         
         if (!response.ok) {

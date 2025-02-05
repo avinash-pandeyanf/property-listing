@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { API_URL } from '../utils/api';
+import { API_URL, fetchConfig } from '../utils/api';
 import '../styles/Auth.css';
 
 const Register = () => {
@@ -29,16 +29,10 @@ const Register = () => {
     setError('');
 
     try {
-      const response = await fetch(`${API_URL}/auth/signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        credentials: 'include',
-        mode: 'cors',
-        body: JSON.stringify(formData)
-      });
+      const response = await fetch(
+        `${API_URL}/api/auth/signup`,
+        fetchConfig('POST', formData)
+      );
 
       const data = await response.json();
 
@@ -46,12 +40,9 @@ const Register = () => {
         throw new Error(data.message || 'Registration failed');
       }
 
-      // Store token and user data
       localStorage.setItem('token', data.data.authToken);
-      localStorage.setItem('userData', JSON.stringify(data.data));
-      
-      // Redirect to home page after successful registration
       navigate('/');
+
     } catch (err) {
       setError(err.message);
     }
