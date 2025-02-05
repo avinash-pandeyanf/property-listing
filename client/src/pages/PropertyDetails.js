@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+const API_URL = process.env.REACT_APP_API_URL || 'https://property-listing-0m2j.onrender.com/api';
 import { useParams } from 'react-router-dom';
 import { FaMapMarkerAlt, FaShareAlt, FaHeart, FaVideo, FaParking, FaPaw, FaFan, FaToilet, FaRulerCombined } from 'react-icons/fa';
 
@@ -12,7 +13,15 @@ const PropertyDetails = () => {
   useEffect(() => {
     const fetchProperty = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/properties/${id}`);
+        const response = await fetch(`${API_URL}/properties/${id}`, {
+          method: 'GET',
+          headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          mode: 'cors'
+        });
         const data = await response.json();
         
         if (!response.ok) {
