@@ -10,12 +10,21 @@ export const handleResponse = async (response) => {
 
 export const authHeader = () => {
     const token = localStorage.getItem('token');
-    return token ? { 
-        'Authorization': `Bearer ${token}`,
+    const headers = {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
-    } : {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Origin': window.location.origin
     };
+
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    return headers;
+};
+
+export const fetchConfig = {
+    credentials: 'include',
+    mode: 'cors',
+    headers: authHeader()
 };

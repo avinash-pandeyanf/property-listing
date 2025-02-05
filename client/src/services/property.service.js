@@ -1,13 +1,10 @@
-import { API_URL } from '../utils/api';
+import { API_URL, handleResponse, authHeader } from '../utils/api';
 
 export const propertyService = {
     getProperties: async (queryParams) => {
         const response = await fetch(`${API_URL}/properties?${queryParams}`, {
             method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
+            headers: authHeader(),
             credentials: 'include',
             mode: 'cors'
         });
@@ -23,10 +20,7 @@ export const propertyService = {
     getPropertyById: async (id) => {
         const response = await fetch(`${API_URL}/properties/${id}`, {
             method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
+            headers: authHeader(),
             credentials: 'include',
             mode: 'cors'
         });
@@ -40,8 +34,13 @@ export const propertyService = {
     },
 
     createProperty: async (formData) => {
+        // Remove Content-Type header for FormData
+        const headers = authHeader();
+        delete headers['Content-Type'];
+        
         const response = await fetch(`${API_URL}/properties`, {
             method: 'POST',
+            headers: headers,
             credentials: 'include',
             mode: 'cors',
             body: formData
@@ -55,5 +54,6 @@ export const propertyService = {
         return data.data;
     }
 };
+
 
 

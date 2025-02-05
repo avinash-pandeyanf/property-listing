@@ -1,13 +1,10 @@
-import { API_URL } from '../utils/api';
+import { API_URL, handleResponse, authHeader } from '../utils/api';
 
 export const authService = {
     login: async (email, password) => {
         const response = await fetch(`${API_URL}/auth/login`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
+            headers: authHeader(),
             credentials: 'include',
             mode: 'cors',
             body: JSON.stringify({ email, password })
@@ -23,10 +20,7 @@ export const authService = {
     register: async (userData) => {
         const response = await fetch(`${API_URL}/auth/signup`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
+            headers: authHeader(),
             credentials: 'include',
             mode: 'cors',
             body: JSON.stringify(userData)
@@ -39,3 +33,4 @@ export const authService = {
         return response.json();
     }
 };
+
