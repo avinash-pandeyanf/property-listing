@@ -1,4 +1,4 @@
-export const API_URL = process.env.REACT_APP_API_URL || 'https://property-listing-0m2j.onrender.com';
+export const API_URL = process.env.REACT_APP_API_URL || 'https://property-listing-0m2j.onrender.com/api';
 
 export const handleResponse = async (response) => {
     if (!response.ok) {

@@ -1,4 +1,4 @@
-const API_URL = process.env.REACT_APP_API_URL || 'https://property-listing-0m2j.onrender.com/api';
+import { API_URL } from '../utils/api';
 
 export const propertyService = {
     getProperties: async (queryParams) => {

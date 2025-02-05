@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { API_URL } from '../utils/api';
 
-const API_URL = process.env.REACT_APP_API_URL || 'https://property-listing-0m2j.onrender.com/api';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {

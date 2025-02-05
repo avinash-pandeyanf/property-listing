@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-const API_URL = process.env.REACT_APP_API_URL || 'https://property-listing-0m2j.onrender.com/api';
 import { useParams } from 'react-router-dom';
 import { FaMapMarkerAlt, FaShareAlt, FaHeart, FaVideo, FaParking, FaPaw, FaFan, FaToilet, FaRulerCombined } from 'react-icons/fa';
+import { API_URL } from '../utils/api';
+
 
 const PropertyDetails = () => {
   const { id } = useParams();
