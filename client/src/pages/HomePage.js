@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaMapMarkerAlt, FaShareAlt, FaHeart, FaVideo, FaSearch } from 'react-icons/fa';
+import { API_URL, fetchConfig } from '../utils/api';
 
 const HomePage = () => {
   const [properties, setProperties] = useState([]);
@@ -38,36 +39,23 @@ const HomePage = () => {
       if (filters.minRent) queryParams.append('minRent', filters.minRent);
       if (filters.maxRent) queryParams.append('maxRent', filters.maxRent);
 
-      const response = await fetch(`/api/properties?${queryParams}`, {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      });
+      const response = await fetch(
+        `${API_URL}/api/properties?${queryParams}`,
+        fetchConfig('GET')
+      );
 
       if (!response.ok) {
-        const errorData = await response.text();
-        try {
-          const jsonError = JSON.parse(errorData);
-          throw new Error(jsonError.message || 'Failed to fetch properties');
-        } catch (e) {
-          throw new Error(errorData || 'Failed to fetch properties');
-        }
-      }
-
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('Received non-JSON response from server');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch properties');
       }
 
       const data = await response.json();
-      if (!data || !data.data) {
+      if (!data.data) {
         throw new Error('Invalid response format');
       }
 
-      setProperties(data.data || []);
-      setTotalPages(data.data.totalPages || 1);
+      setProperties(data.data.properties || []);
+      setTotalPages(Math.ceil(data.data.total / 6) || 1);
     } catch (err) {
       console.error('Error fetching properties:', err);
       setError(err.message);

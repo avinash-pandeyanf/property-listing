@@ -8,9 +8,9 @@ export const handleResponse = async (response) => {
     return response.json();
 };
 
-export const authHeader = () => {
+export const authHeader = (isFormData = false) => {
     const token = localStorage.getItem('token');
-    const headers = {
+    const headers = isFormData ? {} : {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
     };
@@ -23,21 +23,18 @@ export const authHeader = () => {
 };
 
 export const fetchConfig = (method = 'GET', body = null) => {
+    const isFormData = body instanceof FormData;
     const config = {
         method,
-        headers: authHeader(),
+        headers: authHeader(isFormData),
         credentials: 'include',
         mode: 'cors'
     };
 
     if (body) {
-        if (body instanceof FormData) {
-            delete config.headers['Content-Type'];
-            config.body = body;
-        } else {
-            config.body = JSON.stringify(body);
-        }
+        config.body = isFormData ? body : JSON.stringify(body);
     }
 
     return config;
 };
+

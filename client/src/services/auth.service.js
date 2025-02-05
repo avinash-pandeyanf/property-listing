@@ -1,30 +1,35 @@
-import { API_URL, handleResponse, fetchConfig } from '../utils/api';
+import { API_URL, fetchConfig } from '../utils/api';
 
 export const authService = {
     login: async (email, password) => {
         const response = await fetch(
-            `${API_URL}/api/auth/login`, 
+            `${API_URL}/api/auth/login`,
             fetchConfig('POST', { email, password })
         );
         
+        const data = await response.json();
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Invalid credentials');
+            throw new Error(data.message || 'Invalid credentials');
         }
-        return response.json();
+        return data.data;
     },
 
     register: async (userData) => {
+        const form = new FormData();
+        Object.keys(userData).forEach(key => {
+            form.append(key, userData[key]);
+        });
+
         const response = await fetch(
-            `${API_URL}/api/auth/signup`, 
-            fetchConfig('POST', userData)
+            `${API_URL}/api/auth/signup`,
+            fetchConfig('POST', form)
         );
         
+        const data = await response.json();
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Registration failed');
+            throw new Error(data.message || 'Registration failed');
         }
-        return response.json();
+        return data.data;
     }
 };
 

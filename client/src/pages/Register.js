@@ -4,7 +4,6 @@ import { API_URL, fetchConfig } from '../utils/api';
 import '../styles/Auth.css';
 
 const Register = () => {
-
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: '',
@@ -15,6 +14,7 @@ const Register = () => {
     selectRole: '',
     yourFirstSchool: ''
   });
+  const [avatar, setAvatar] = useState(null);
   const [error, setError] = useState('');
 
   const handleChange = (e) => {
@@ -24,14 +24,27 @@ const Register = () => {
     });
   };
 
+  const handleFileChange = (e) => {
+    setAvatar(e.target.files[0]);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     try {
+      const form = new FormData();
+      Object.keys(formData).forEach(key => {
+        form.append(key, formData[key]);
+      });
+      
+      if (avatar) {
+        form.append('avatar', avatar);
+      }
+
       const response = await fetch(
         `${API_URL}/api/auth/signup`,
-        fetchConfig('POST', formData)
+        fetchConfig('POST', form)  // Using fetchConfig with FormData
       );
 
       const data = await response.json();
@@ -42,11 +55,11 @@ const Register = () => {
 
       localStorage.setItem('token', data.data.authToken);
       navigate('/');
-
     } catch (err) {
       setError(err.message);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center">
@@ -130,13 +143,22 @@ const Register = () => {
             </div>
             <div>
               <input
-                type="text"
-                name="yourFirstSchool"
-                value={formData.yourFirstSchool}
-                onChange={handleChange}
-                placeholder="Your First School"
-                className="w-full bg-transparent border-b border-gray-600 px-4 py-2 text-white focus:outline-none focus:border-teal-500"
-                required
+              type="text"
+              name="yourFirstSchool"
+              value={formData.yourFirstSchool}
+              onChange={handleChange}
+              placeholder="Your First School"
+              className="w-full bg-transparent border-b border-gray-600 px-4 py-2 text-white focus:outline-none focus:border-teal-500"
+              required
+              />
+            </div>
+            <div>
+              <input
+              type="file"
+              name="avatar"
+              onChange={handleFileChange}
+              accept="image/*"
+              className="w-full bg-transparent border-b border-gray-600 px-4 py-2 text-white focus:outline-none focus:border-teal-500"
               />
             </div>
             <button
