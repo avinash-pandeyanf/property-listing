@@ -16,7 +16,8 @@ export const propertyService = {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Failed to fetch properties');
         }
-        return response.json();
+        const data = await response.json();
+        return data.data;
     },
 
     getPropertyById: async (id) => {
@@ -34,7 +35,8 @@ export const propertyService = {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Failed to fetch property');
         }
-        return response.json();
+        const data = await response.json();
+        return data.data;
     },
 
     createProperty: async (formData) => {
@@ -49,25 +51,9 @@ export const propertyService = {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Failed to create property');
         }
-        return response.json();
-    },
-
-    updatePropertyViews: async (id) => {
-        const response = await fetch(`${API_URL}/properties/${id}/views`, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            mode: 'cors'
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to update views');
-        }
-        return response.json();
+        const data = await response.json();
+        return data.data;
     }
 };
+
 

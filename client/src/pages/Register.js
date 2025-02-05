@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-const API_URL = process.env.REACT_APP_API_URL || 'https://property-listing-0m2j.onrender.com/api';
 import { Link, useNavigate } from 'react-router-dom';
 import '../styles/Auth.css';
+
+const API_URL = process.env.REACT_APP_API_URL || 'https://property-listing-0m2j.onrender.com/api';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ const Register = () => {
     setError('');
 
     try {
-        const response = await fetch(`${API_URL}/auth/signup`, {
+      const response = await fetch(`${API_URL}/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -45,7 +46,12 @@ const Register = () => {
         throw new Error(data.message || 'Registration failed');
       }
 
-      navigate('/login');
+      // Store token and user data
+      localStorage.setItem('token', data.data.authToken);
+      localStorage.setItem('userData', JSON.stringify(data.data));
+      
+      // Redirect to home page after successful registration
+      navigate('/');
     } catch (err) {
       setError(err.message);
     }

@@ -16,8 +16,8 @@ const PropertyDetails = () => {
         const response = await fetch(`${API_URL}/properties/${id}`, {
           method: 'GET',
           headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
           },
           credentials: 'include',
           mode: 'cors'
@@ -28,7 +28,7 @@ const PropertyDetails = () => {
           throw new Error(data.message || 'Failed to fetch property details');
         }
         
-        setProperty(data.property);
+        setProperty(data.data);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -38,6 +38,7 @@ const PropertyDetails = () => {
 
     fetchProperty();
   }, [id]);
+
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => 

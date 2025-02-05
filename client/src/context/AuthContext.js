@@ -5,42 +5,31 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Check if user is logged in on mount
     const token = localStorage.getItem('token');
     if (token) {
-      // Verify token with backend
-        fetch(`${API_URL}/auth/verify`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
-        },
-        credentials: 'include',
-        mode: 'cors'
-        })
-      .then(res => res.json())
-      .then(data => {
-        if (data.user) {
-          setUser(data.user);
+      // Set initial user state from stored data
+      const storedUser = localStorage.getItem('userData');
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch (e) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('userData');
         }
-      })
-      .catch(err => {
-        localStorage.removeItem('token');
-      })
-      .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
+      }
     }
+    setLoading(false);
   }, []);
 
   const login = async (email, password) => {
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
       },
       credentials: 'include',
       mode: 'cors',
@@ -50,31 +39,9 @@ export const AuthProvider = ({ children }) => {
     const data = await response.json();
     
     if (response.ok) {
-      localStorage.setItem('token', data.token);
-      setUser(data.user);
-      return { success: true };
-    } else {
-      throw new Error(data.message);
-    }
-  };
-
-  const register = async (userData) => {
-    const response = await fetch(`${API_URL}/auth/register`, {
-      method: 'POST',
-      headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-      },
-      credentials: 'include',
-      mode: 'cors',
-      body: JSON.stringify(userData),
-    });
-    
-    const data = await response.json();
-    
-    if (response.ok) {
-      localStorage.setItem('token', data.token);
-      setUser(data.user);
+      localStorage.setItem('token', data.data.authToken);
+      localStorage.setItem('userData', JSON.stringify(data.data));
+      setUser(data.data);
       return { success: true };
     } else {
       throw new Error(data.message);
@@ -83,14 +50,16 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('userData');
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => useContext(AuthContext);
+
