@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { API_URL, fetchConfig } from '../utils/api';
+import { authService } from '../services/auth.service';
 import '../styles/Auth.css';
 
 const Register = () => {
@@ -14,7 +14,6 @@ const Register = () => {
     selectRole: '',
     yourFirstSchool: ''
   });
-  const [avatar, setAvatar] = useState(null);
   const [error, setError] = useState('');
 
   const handleChange = (e) => {
@@ -24,41 +23,20 @@ const Register = () => {
     });
   };
 
-  const handleFileChange = (e) => {
-    setAvatar(e.target.files[0]);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     try {
-      const form = new FormData();
-      Object.keys(formData).forEach(key => {
-        form.append(key, formData[key]);
-      });
-      
-      if (avatar) {
-        form.append('avatar', avatar);
-      }
-
-      const response = await fetch(
-        `${API_URL}/api/auth/signup`,
-        fetchConfig('POST', form)  // Using fetchConfig with FormData
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
-      }
-
-      localStorage.setItem('token', data.data.authToken);
+      const data = await authService.register(formData);
+      localStorage.setItem('token', data.authToken);
       navigate('/');
     } catch (err) {
       setError(err.message);
     }
   };
+
+
 
 
   return (
@@ -152,15 +130,8 @@ const Register = () => {
               required
               />
             </div>
-            <div>
-              <input
-              type="file"
-              name="avatar"
-              onChange={handleFileChange}
-              accept="image/*"
-              className="w-full bg-transparent border-b border-gray-600 px-4 py-2 text-white focus:outline-none focus:border-teal-500"
-              />
-            </div>
+
+
             <button
               type="submit"
               className="w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white py-2 rounded-lg hover:from-teal-600 hover:to-teal-700 transition-all duration-300"

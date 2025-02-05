@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { API_URL, fetchConfig } from '../utils/api';
+import { authService } from '../services/auth.service';
 import '../styles/Auth.css';
-
 
 const Login = () => {
   const navigate = useNavigate();
@@ -24,24 +23,14 @@ const Login = () => {
     setError('');
 
     try {
-      const response = await fetch(
-        `${API_URL}/api/auth/login`,
-        fetchConfig('POST', formData)
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-
-      localStorage.setItem('token', data.data.authToken);
+      const data = await authService.login(formData.email, formData.password);
+      localStorage.setItem('token', data.authToken);
       navigate('/');
-
     } catch (err) {
       setError(err.message);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center">
